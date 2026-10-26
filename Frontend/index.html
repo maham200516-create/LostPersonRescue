@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lost Person Search & Rescue System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HOME -->
+<section id="home" class="screen active">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">⛰</div>
+      <div>
+        <h1>Lost Person Search & Rescue System</h1>
+        <p class="muted">Regional Operations Center · Sector 7</p>
+      </div>
+    </div>
+    <div class="right">
+      <div class="time" data-clock></div>
+      <div class="muted" data-date></div>
+    </div>
+  </header>
+  <div class="home-body">
+    <div class="stats-grid" id="homeStats"></div>
+    <div class="cards">
+      <button class="card red" onclick="show('register')">
+        <div class="icon">👤</div>
+        <h2>Report Missing Person</h2>
+        <p>Register a new case with last known location, physical description, and urgency level.</p>
+        <span class="open">Open →</span>
+      </button>
+      <button class="card blue" onclick="show('track')">
+        <div class="icon">🔍</div>
+        <h2>Track Search & Rescue</h2>
+        <p>Monitor node coverage, view active case timers, sighting history, and the search map.</p>
+        <span class="open">Open →</span>
+      </button>
+      <button class="card green" onclick="show('track')">
+        <div class="icon">👥</div>
+        <h2>Rescue Teams</h2>
+        <p>Check team deployment status, current assignments, and field availability in real time.</p>
+        <span class="open">Open →</span>
+      </button>
+    </div>
+    <div class="status-bar"><span class="dot"></span><b>SYSTEM OPERATIONAL</b><span class="muted" id="statusText"></span></div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section id="register" class="screen">
+  <header class="top bar">
+    <button class="btn" onclick="show('home')">‹ Back to Home</button>
+    <div class="vline"></div>
+    <div><b>Register Missing Person</b><p class="muted">Create a new search and rescue case</p></div>
+  </header>
+  <form id="regForm" class="form">
+    <div class="row2"><div style="flex:2"><label>Full Name *</label><input id="fName" placeholder="e.g. Elena Marchetti" required></div>
+      <div style="flex:1"><label>Age *</label><input id="fAge" type="number" min="1" max="120" placeholder="34" required></div></div>
+    <div><label>Gender</label>
+      <select id="fGender"><option>Female</option><option>Male</option><option>Non-binary</option><option>Unknown</option></select></div>
+    <div><label>Description — Clothing & Distinguishing Features</label>
+      <textarea id="fDesc" rows="4" placeholder="e.g. Red jacket, blue jeans, brown hiking boots."></textarea></div>
+    <div class="row2">
+      <div style="flex:1"><label>Last Seen Location</label><select id="fNode"></select></div>
+      <div style="flex:1"><label>Urgency Level</label>
+        <div class="urg" id="urgBtns">
+          <button type="button" data-u="1">High</button>
+          <button type="button" data-u="2" class="on">Medium</button>
+          <button type="button" data-u="3">Low</button>
+        </div></div>
+    </div>
+    <div class="row2 top-line">
+      <button type="submit" class="btn primary" style="flex:1">Register Case</button>
+      <button type="button" class="btn" onclick="show('home')">Cancel</button>
+    </div>
+  </form>
+</section>
+
+<!-- TRACK -->
+<section id="track" class="screen">
+  <header class="top bar between">
+    <div class="bar">
+      <button class="btn" onclick="show('home')">‹ Home</button>
+      <div class="vline"></div>
+      <b>Lost Person Search & Rescue System</b>
+    </div>
+    <div class="track-stats" id="trackStats"></div>
+    <div class="bar"><span class="dot"></span><b class="live">LIVE</b><span class="mono muted" data-clock></span></div>
+  </header>
+  <div class="grid3">
+    <div class="col">
+      <div class="col-head"><span>MISSING PERSONS</span><button class="sq" onclick="show('register')">+</button></div>
+      <div class="scroll" id="personList"></div>
+    </div>
+    <div class="center">
+      <div class="panel mapPanel">
+        <div class="between">
+          <span class="sub">⚑ Search Location Map</span>
+          <div class="bar">
+            <button class="btn amber" onclick="openModal()">👁 Report Sighting</button>
+            <button class="btn bluebtn" id="searchBtn" onclick="startSearch()">🔍 Start Search</button>
+          </div>
+        </div>
+        <div id="map"></div>
+        <div class="legend">
+          <span><i style="background:rgba(51,65,85,.85);border-color:#64748b"></i>Unsearched</span>
+          <span><i style="background:rgba(22,163,74,.65);border-color:#22c55e"></i>Searched</span>
+          <span><i style="background:rgba(239,68,68,.55);border-color:#ef4444"></i>Last Sighting</span>
+          <span><i style="background:rgba(251,146,60,.12);border-color:#fb923c"></i>Searching</span>
+          <span><i style="background:#3b82f6;border-color:#1e40af"></i>Team</span>
+          <span class="muted log" id="log">Click a node to inspect</span>
+        </div>
+      </div>
+      <div class="panel detail" id="detail"></div>
+    </div>
+    <div class="col">
+      <div class="col-head"><span>RESCUE TEAMS</span></div>
+      <div class="scroll" id="teamList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGHTING MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <div class="between"><div><b>Report Sighting</b><p class="muted">Log a visual sighting in the field</p></div>
+      <button class="sq" onclick="closeModal()">✕</button></div>
+    <label>Case</label><select id="mCase"></select>
+    <label>Location (Node)</label><select id="mNode"></select>
+    <label>Time</label><input id="mTime" type="time">
+    <div class="row2 top-line">
+      <button class="btn amber" style="flex:1" onclick="submitSighting()">Submit Sighting</button>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
